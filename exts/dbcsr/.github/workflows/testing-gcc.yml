@@ -1,0 +1,40 @@
+---
+name: Testing with latest gcc
+on:
+  push:
+    branches:
+    - 'develop'
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/cp2k/dbcsr-build-env-latest-gcc:develop
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        submodules: true
+
+    - name: Configure
+      run: |
+        mkdir -p build
+        cd build
+        cmake -G Ninja \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DUSE_MPI=OFF \
+          -DUSE_OPENMP=ON \
+          -DUSE_SMM=blas \
+          ..
+
+    - name: Build
+      run: cmake --build build -- --verbose
+
+    - name: Test
+      run: |
+        cd build
+        ctest --output-on-failure
+
+#  vim: set ts=2 sw=2 tw=0 :

@@ -1,0 +1,9 @@
+exe
+lib
+obj
+regtesting
+tools/toolchain/install
+tools/toolchain/build
+.git*
+*~
+\#*\#

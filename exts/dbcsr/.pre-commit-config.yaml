@@ -1,0 +1,66 @@
+default_language_version:
+    python: python3
+
+exclude: '^tools/(build_utils/fypp)'
+fail_fast: false
+repos:
+- repo: https://github.com/ambv/black
+  rev: 22.6.0
+  hooks:
+  - id: black
+    name: Reformat Python files with the black code formatter
+    files: '^.*(/PACKAGE)|(\.py)$'
+- repo: https://github.com/pycqa/flake8
+  rev: 5.0.4
+  hooks:
+  - id: flake8
+    exclude: >-
+      (?x)^(
+        .cp2k/.*|
+      )$
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.3.0
+  hooks:
+  - id: check-ast
+  - id: check-yaml
+  - id: check-symlinks
+  - id: trailing-whitespace
+- repo: https://github.com/pseewald/fprettify
+  rev: v0.3.7
+  hooks:
+  - id: fprettify
+- repo: https://github.com/cheshirekow/cmake-format-precommit
+  rev: v0.6.13
+  hooks:
+  - id: cmake-format
+    exclude: >-
+      (?x)^(
+        cmake/(CheckFortranSourceRuns|CompilerConfiguration|Find(BLAS|LAPACK)|GetGitRevisionDescription).cmake|
+      )$
+- repo: local
+  hooks:
+  - id: check-header
+    name: check file headers
+    entry: ./.pre-commit/check_header.py --verbose
+    language: script
+    types: [text]
+    exclude: >-
+      (?x)^(
+        tools/.*|
+        .cp2k/.*|
+        .cmake-format.py|
+        src/acc/hip/dbcsr_hip_profiling.F|
+      )$
+  - id: check-doxygen-tags
+    name: no doxygen tags present
+    entry: '^\s*!>'
+    language: pygrep
+    types: [text]
+  - id: clang-format-fypp
+    name: clang-format-fypp
+    description: Format files with ClangFormat, ignore FYPP directives.
+    entry: ./.pre-commit/clang-format-fypp.sh
+    language: python
+    files: \.(c|cc|cxx|cpp|cl|frag|glsl|h|hpp|hxx|ih|ispc|ipp|java|js|m|mm|proto|textproto|vert)$
+    args: ['-i', '-fallback-style=none', '--style=file']
+    additional_dependencies: ['clang-format']
